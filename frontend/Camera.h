@@ -27,10 +27,11 @@ public:
     bool firstClick = true;
 
     float speed = 0.1f;
-    float sensitivity = 100.0f;
+    float sensitivity = 150.0f;
 
     float yaw = -90.0f;  // Facing toward negative Z
     float pitch = 0.0f;  // Level with the horizon
+
 
     Camera(int width, int height, glm::vec3 position);
 

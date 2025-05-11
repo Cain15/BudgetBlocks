@@ -7,13 +7,13 @@ out vec3 color;
 
 out vec2 texCoord;
 
-uniform float scale;
-
 uniform mat4 camMatrix;
+
+uniform vec3 BlockCoordinate;
 
 void main()
 {
-    gl_Position = camMatrix * vec4(aPos, 1.0);
+    gl_Position = camMatrix * vec4(aPos + BlockCoordinate, 1.0);
     color = aColor;
     texCoord = aTex;
 }

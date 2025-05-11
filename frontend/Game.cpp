@@ -141,6 +141,10 @@ int Game::run() {
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {
+        // Set the coordinate of the block;
+        glm::vec3 blockCoordinate = glm::vec3(0.0f, 0.0f, 0.0f);
+        glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+
         // Specify the color of the background
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         // Clean the back buffer and assign the new color to it
@@ -157,6 +161,12 @@ int Game::run() {
         VAO1.Bind();
         // Draw primitives, number of indices, datatype of indices, index of indices
         glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+
+        // Draw a second cube
+        blockCoordinate = glm::vec3(1.0f, 0.0f, 0.0f);
+        glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);
         // Take care of all GLFW events
