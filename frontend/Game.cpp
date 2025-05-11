@@ -81,7 +81,7 @@ int Game::run() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-    GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "BudgetBlocks", NULL, NULL);
     // Error check if the window fails to create
     if (window == NULL)
     {
@@ -141,9 +141,7 @@ int Game::run() {
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {
-        // Set the coordinate of the block;
-        glm::vec3 blockCoordinate = glm::vec3(0.0f, 0.0f, 0.0f);
-        glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+
 
         // Specify the color of the background
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -159,13 +157,19 @@ int Game::run() {
         popCat.Bind();
         // Bind the VAO so OpenGL knows to use it
         VAO1.Bind();
-        // Draw primitives, number of indices, datatype of indices, index of indices
-        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 
-        // Draw a second cube
-        blockCoordinate = glm::vec3(1.0f, 0.0f, 0.0f);
-        glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
-        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+        glm::vec3 blockCoordinate;
+        // Draw blocks
+        for (int x = 0 ; x < 16; x++) {
+            for (int z = 0 ; z > -16; z--) {
+                // Set the coordinate of the block;
+                blockCoordinate = glm::vec3((float) x , 0.0f, (float) z);
+                glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+                // Draw primitives, number of indices, datatype of indices, index of indices
+                glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+            }
+        }
+
 
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);

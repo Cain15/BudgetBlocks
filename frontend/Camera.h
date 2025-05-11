@@ -26,8 +26,9 @@ public:
 
     bool firstClick = true;
 
-    float speed = 0.1f;
-    float sensitivity = 150.0f;
+    float initialSpeed = 0.05f;
+    float speed = initialSpeed;
+    float sensitivity = 175.0f;
 
     float yaw = -90.0f;  // Facing toward negative Z
     float pitch = 0.0f;  // Level with the horizon
