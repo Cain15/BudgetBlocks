@@ -22,6 +22,7 @@ set(FRONTEND_SOURCES
 # ========== Entry Point ==========
 set(MAIN_SOURCE
         main.cpp
+        utils.h
 )
 
 # ========== Group Sources ==========
@@ -63,3 +64,5 @@ target_link_libraries(ScuffedCraft glfw ${OPENGL_LIBRARIES} dl)
 # ========== Install Rules ==========
 install(TARGETS ScuffedCraft RUNTIME DESTINATION bin)
 install(TARGETS GameLogic ARCHIVE DESTINATION lib)
+target_link_libraries(ScuffedCraft GameLogic)
+

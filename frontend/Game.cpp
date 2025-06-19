@@ -6,11 +6,8 @@
 
 #include <iostream>
 
-#include <filesystem>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <stb/stb_image.h>
 
 #include "VBO.h"
 #include "VAO.h"
@@ -66,8 +63,14 @@ GLuint indices[] =
         };
 
 int Game::run() {
-    width = 1600;
-    height = 900;
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW\n";
+        return -1;
+    }
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primary);
+    width = mode->width;
+    height = mode->height;
 
     // Initialize GLFW
     glfwInit();
@@ -139,10 +142,17 @@ int Game::run() {
     Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
     // Main while loop
+    auto startTime = static_cast<float>(glfwGetTime());
+
     while (!glfwWindowShouldClose(window))
     {
+        float deltaTime = static_cast<float>(glfwGetTime()) - startTime;
+        float fps = 1.0f / deltaTime;
+        startTime = static_cast<float>(glfwGetTime());
 
+        world->update(deltaTime);
 
+        std::cout << "FPS: " << fps << std::endl;
         // Specify the color of the background
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         // Clean the back buffer and assign the new color to it
@@ -151,6 +161,9 @@ int Game::run() {
         shaderProgram.Activate();
 
         camera.Inputs(window);
+        handleInput(window);
+        coordinates playerpos = world->player->getPosition();
+        camera.Position = glm::vec3(playerpos.x, playerpos.y, playerpos.z + 2.0f);
         camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 
         // Binds texture so that is appears in rendering
@@ -160,15 +173,13 @@ int Game::run() {
 
         glm::vec3 blockCoordinate;
         // Draw blocks
-        for (int x = 0 ; x < 16; x++) {
-            for (int z = 0 ; z > -16; z--) {
-                // Set the coordinate of the block;
-                blockCoordinate = glm::vec3((float) x , 0.0f, (float) z);
-                glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
-                // Draw primitives, number of indices, datatype of indices, index of indices
-                glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
-            }
-        }
+
+        // Set the coordinate of the block;
+        blockCoordinate = glm::vec3((float) 0.0f , 0.0f, 0.0f);
+        glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+        // Draw primitives, number of indices, datatype of indices, index of indices
+        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+
 
 
         // Swap the back buffer with the front buffer
@@ -190,4 +201,8 @@ int Game::run() {
     // Terminate GLFW before ending the program
     glfwTerminate();
     return 0;
+}
+
+void Game::handleInput(GLFWwindow *window) {
+
 }

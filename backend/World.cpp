@@ -3,3 +3,7 @@
 //
 
 #include "World.h"
+
+void World::update(float deltaTime) {
+
+}
