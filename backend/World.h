@@ -7,12 +7,20 @@
 
 #include <memory>
 #include "Player.h"
+#include "../frontend/Camera.h"
+#include "../utils.h"
 
 class World {
 public:
     std::shared_ptr<Player> player = std::make_shared<Player>();
 
     void update(float deltaTime);
+
+    void handleInput(input info, std::pair<float, float> mousePosition = {0.0f, 0.0f});
+
+    std::shared_ptr<Camera> getPlayerCamera() {
+        return player->getCamera();
+    }
 private:
     float tickRate = 20.0f; // 20 ticks per second
     float tickInterval = 1.0f / tickRate; // Interval between ticks in seconds

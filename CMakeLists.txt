@@ -16,7 +16,6 @@ set(FRONTEND_SOURCES
         frontend/glad.c
         frontend/Game.cpp
         frontend/Camera.cpp
-        frontend/Camera.h
 )
 
 # ========== Entry Point ==========
@@ -65,4 +64,5 @@ target_link_libraries(ScuffedCraft glfw ${OPENGL_LIBRARIES} dl)
 install(TARGETS ScuffedCraft RUNTIME DESTINATION bin)
 install(TARGETS GameLogic ARCHIVE DESTINATION lib)
 target_link_libraries(ScuffedCraft GameLogic)
+
 

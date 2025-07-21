@@ -10,6 +10,14 @@ enum class input {
     BACKWARD,
     LEFT,
     RIGHT,
+    JUMP,
+    SNEAK,
+    SPRINT,
+    UNSPRINT,
+    ESCAPE,
+    LEFT_CLICK,
+    RIGHT_CLICK,
+    CURSOR_POSITION,
 };
 
 #endif //BUDGETBLOCKS_UTILS_H

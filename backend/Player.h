@@ -5,19 +5,36 @@
 #ifndef BUDGETBLOCKS_PLAYER_H
 #define BUDGETBLOCKS_PLAYER_H
 
-struct coordinates {
-    float x;
-    float y;
-    float z;
-};
+#include <glm/glm.hpp>
+#include "../frontend/Camera.h"
+#include "memory"
 
 class Player {
 public:
-    coordinates position = {0.0f, 0.0f, 0.0f};
+    [[nodiscard]] glm::vec3 getPosition() const;
 
-    [[nodiscard]] coordinates getPosition() const;
+    std::shared_ptr<Camera> getCamera() {
+        return playercam;
+    }
 
-    void move(float deltaX, float deltaY, float deltaZ);
+    void forward();
+
+    void moveHead(float mouseX, float mouseY);
+private:
+    glm::vec3 Position = glm::vec3(0.0f, 2.0f, 0.0f);
+    glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    std::shared_ptr<Camera> playercam = std::make_shared<Camera>(0, 0, Position);
+
+    bool firstClick = true;
+
+    float initialSpeed = 0.05f;
+    float speed = initialSpeed;
+    float sensitivity = 175.0f;
+
+    float yaw = -90.0f;  // Facing toward negative Z
+    float pitch = 0.0f;  // Level with the horizon
 };
 
 
