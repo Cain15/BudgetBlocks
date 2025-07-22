@@ -6,18 +6,33 @@
 #define BUDGETBLOCKS_PLAYER_H
 
 #include <glm/glm.hpp>
-#include "../frontend/Camera.h"
+#include "CameraView.h"
 #include "memory"
 
 class Player {
 public:
     [[nodiscard]] glm::vec3 getPosition() const;
 
-    std::shared_ptr<Camera> getCamera() {
+    std::shared_ptr<CameraView> getCamera() {
         return playercam;
     }
 
+    void setPosition(const glm::vec3 &position);
+
+    void addVerticalSpeed(float speed);
+
     void forward();
+
+    void backward();
+
+    void left();
+
+    void right();
+
+    void jump();
+    void notJumping();
+
+    void update(float deltaTime);
 
     void moveHead(float mouseX, float mouseY);
 private:
@@ -25,16 +40,22 @@ private:
     glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    std::shared_ptr<Camera> playercam = std::make_shared<Camera>(0, 0, Position);
+    std::shared_ptr<CameraView> playercam = std::make_shared<CameraView>(0, 0, Position);
 
     bool firstClick = true;
 
+    float verticalSpeed = 0.0f; // Vertical speed for jumping
+    float jumpSpeed = sqrt(2.0f * 9.81f * 1.0f); // Initial jump speed (assuming 1 meter jump height)
+    bool isJumping = false; // Flag to check if the player is jumping
+
     float initialSpeed = 0.05f;
     float speed = initialSpeed;
-    float sensitivity = 175.0f;
+    float sensitivity = 150.0f;
 
     float yaw = -90.0f;  // Facing toward negative Z
     float pitch = 0.0f;  // Level with the horizon
+
+    void updateCamera();
 };
 
 

@@ -16,6 +16,7 @@
 #include "Texture.h"
 #include "Camera.h"
 #include "../utils.h"
+#include "../backend/CameraView.h"
 
 // Vertices coordinates
 GLfloat vertices[] = { //     COORDINATES     /        COLORS      /         TexCoord  //   face | height | side from front perspective
@@ -136,7 +137,9 @@ int Game::run() {
     glCullFace(GL_BACK);
     glFrontFace(GL_CW);
 
-    std::shared_ptr<Camera> camera = world->getPlayerCamera();
+    std::shared_ptr<CameraView> cameraView = world->getPlayerCamera();
+    cameraView->setResolution(width, height);
+    Camera camera(width, height, cameraView->getPosition());
 
     // Main while loop
     auto startTime = static_cast<float>(glfwGetTime());
@@ -159,9 +162,10 @@ int Game::run() {
         shaderProgram.Activate();
 
         handleInput(window);
-        glm::vec3 playerpos = world->player->getPosition();
-        camera->Position = playerpos;
-        camera->Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+        camera.Position = cameraView->getPosition();
+        camera.Orientation = cameraView->getOrientation();
+        camera.Up = cameraView->getUp();
+        camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 
         // Binds texture so that is appears in rendering
         block.Bind();
@@ -205,7 +209,6 @@ bool firstClick = true;
 void Game::handleInput(GLFWwindow *window) {
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
-    world->handleInput(input::CURSOR_POSITION, {static_cast<float>(mouseX), static_cast<float>(mouseY)});
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         world->handleInput(input::FORWARD);
     }

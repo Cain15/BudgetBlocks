@@ -24,21 +24,9 @@ public:
     int width;
     int height;
 
-    bool firstClick = true;
-
-    float initialSpeed = 0.05f;
-    float speed = initialSpeed;
-    float sensitivity = 175.0f;
-
-    float yaw = -90.0f;  // Facing toward negative Z
-    float pitch = 0.0f;  // Level with the horizon
-
-
     Camera(int width, int height, glm::vec3 position);
 
     void Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform);
-
-    void Inputs(GLFWwindow* window);
 };
 
 

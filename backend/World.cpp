@@ -6,7 +6,15 @@
 #include <glm/glm.hpp>
 
 void World::update(float deltaTime) {
+    player->update(deltaTime);
 
+    // Make gravity work
+    if (player->getPosition().y > 2.0f) {
+        player->addVerticalSpeed(- 9.81f * deltaTime); // Apply gravity
+    } else {
+        player->setPosition(glm::vec3(player->getPosition().x, 2.0f, player->getPosition().z));
+        player->notJumping();
+    }
 }
 
 void World::handleInput(input info, std::pair<float, float> mousePosition) {
@@ -15,12 +23,16 @@ void World::handleInput(input info, std::pair<float, float> mousePosition) {
             player->forward();
             break;
         case input::BACKWARD:
+            player->backward();
             break;
         case input::LEFT:
+            player->left();
             break;
         case input::RIGHT:
+            player->right();
             break;
         case input::JUMP:
+            player->jump();
             break;
         case input::SNEAK:
             break;

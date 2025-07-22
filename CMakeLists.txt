@@ -8,6 +8,8 @@ set(BACKEND_SOURCES
         backend/World.cpp
         backend/Block.cpp
         backend/Player.cpp
+        backend/CameraView.cpp
+        backend/CameraView.h
 )
 
 # ========== Frontend ==========

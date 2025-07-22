@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "Player.h"
-#include "../frontend/Camera.h"
+#include "CameraView.h"
 #include "../utils.h"
 
 class World {
@@ -18,7 +18,7 @@ public:
 
     void handleInput(input info, std::pair<float, float> mousePosition = {0.0f, 0.0f});
 
-    std::shared_ptr<Camera> getPlayerCamera() {
+    std::shared_ptr<CameraView> getPlayerCamera() {
         return player->getCamera();
     }
 private:
