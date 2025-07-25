@@ -6,3 +6,4 @@
 - [ ] Independent loop from GLWF
 - [ ] Store and reach blocks in world
 - [ ] Make worldView to render blocks
+- [ ] Make horizontal acceleration and deceleration

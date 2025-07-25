@@ -9,9 +9,24 @@
 #include "Player.h"
 #include "CameraView.h"
 #include "../utils.h"
+#include "Chunk.h"
+#include "Block.h"
+#include <unordered_map>
+#include "WorldView.h"
+
+struct ChunkCoordHash {
+    std::size_t operator()(const ChunkCoord &coord) const {
+        std::size_t hx = std::hash<int>()(coord.x);
+        std::size_t hy = std::hash<int>()(coord.y);
+        std::size_t hz = std::hash<int>()(coord.z);
+        return hx ^ (hy << 1) ^ (hz << 2);
+    }
+};
 
 class World {
 public:
+    explicit World(std::shared_ptr<WorldView>);
+
     std::shared_ptr<Player> player = std::make_shared<Player>();
 
     void update(float deltaTime);
@@ -21,11 +36,34 @@ public:
     std::shared_ptr<CameraView> getPlayerCamera() {
         return player->getCamera();
     }
+
 private:
     float tickRate = 20.0f; // 20 ticks per second
     float tickInterval = 1.0f / tickRate; // Interval between ticks in seconds
     float accumulator = 0.0f; // Accumulator for time
+
+    std::unordered_map<ChunkCoord, std::unique_ptr<Chunk>, ChunkCoordHash> chunkMap;
+
+    const Block &getBlock(int x, int y, int z) const;
+
+    ChunkCoord PlayerChunkCoord = {0, 0, 0}; // The chunk the player is currently in
+
+    void loadChunk(int x, int y, int z);
+
+    ChunkCoord getChunkCoord(int x, int y, int z) {
+        return {floorDiv(x,16), floorDiv(y,16), floorDiv(z,16)};
+    }
+
+    std::shared_ptr<WorldView> worldView;
+
+    void updateWorldView();
+
+    int floorDiv(int a, int b) {
+        return (a >= 0) ? (a / b) : ((a - b + 1) / b);
+    }
 };
+
+
 
 
 #endif //BUDGETBLOCKS_WORLD_H

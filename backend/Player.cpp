@@ -10,18 +10,23 @@ glm::vec3 Player::getPosition() const {
 }
 
 void Player::forward() {
-    Position += speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
+    if (isJumping) {
+        // If the player is jumping, you have less momentum
+        Position += 0.1f * speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
+    } else {
+        Position += speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
+    }
 }
 
 void Player::moveHead(float mouseX, float mouseY) {
     int height = playercam->getResolution().second;
     int width = playercam->getResolution().first;
-    float rotX = sensitivity * (float)(mouseY - (height / 2)) / height;
-    float rotY = sensitivity * (float)(mouseX - (width / 2)) / width;
+    float rotX = sensitivity * (float) (mouseY - (height / 2)) / height;
+    float rotY = sensitivity * (float) (mouseX - (width / 2)) / width;
 
     // Update pitch and yaw
     pitch -= rotX; // Inverted Y
-    yaw   += rotY;
+    yaw += rotY;
 
     // Clamp pitch to avoid gimbal lock
     if (pitch > 89.0f) pitch = 89.0f;
@@ -47,18 +52,18 @@ void Player::backward() {
 }
 
 void Player::left() {
-    Position += 0.8f*speed * -glm::normalize(glm::cross(Orientation, Up));
+    Position += 0.8f * speed * -glm::normalize(glm::cross(Orientation, Up));
 }
 
 void Player::right() {
-    Position += 0.8f*speed * glm::normalize(glm::cross(Orientation, Up));
+    Position += 0.8f * speed * glm::normalize(glm::cross(Orientation, Up));
 }
 
 void Player::jump() {
-   if (!isJumping) {
+    if (!isJumping) {
         verticalSpeed = jumpSpeed; // Set the initial vertical speed for the jump
         isJumping = true; // Set the jumping flag to true
-   }
+    }
 }
 
 void Player::setPosition(const glm::vec3 &position) {

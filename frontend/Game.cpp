@@ -174,10 +174,10 @@ int Game::run() {
 
         glm::vec3 blockCoordinate;
         // Draw blocks
-        for (int x = -5; x < 5; x++) {
-            for (int y = -5; y < 5; y++) {
-                // Set the coordinate of the block;
-                blockCoordinate = glm::vec3((float) x, 0.0f, (float) y);
+        for (auto &blockPair : worldView->getBlocks()) {
+            // Set the coordinate of the block;
+            blockCoordinate = glm::vec3(blockPair.second.x, blockPair.second.y, blockPair.second.z);
+            if (blockPair.first == BlockType::DIRT) {
                 glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
                 // Draw primitives, number of indices, datatype of indices, index of indices
                 glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);

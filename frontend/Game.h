@@ -14,6 +14,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include "../backend/World.h"
+#include "../backend/WorldView.h"
 
 /* *
  * @class Game
@@ -31,7 +32,9 @@ public:
 private:
     unsigned int width, height;
 
-    std::unique_ptr<World> world = std::make_unique<World>();
+    std::shared_ptr<WorldView> worldView = std::make_shared<WorldView>();
+
+    std::unique_ptr<World> world = std::make_unique<World>(worldView);
 
     void handleInput(GLFWwindow *window);
 };

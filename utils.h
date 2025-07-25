@@ -20,4 +20,18 @@ enum class input {
     CURSOR_POSITION,
 };
 
+enum BlockType {
+    AIR,
+    DIRT,
+    GRASS,
+};
+
+struct BlockCoord {
+    int x, y, z;
+
+    bool operator==(const BlockCoord &other) const {
+        return x == other.x && y == other.y && z == other.z;
+    }
+};
+
 #endif //BUDGETBLOCKS_UTILS_H

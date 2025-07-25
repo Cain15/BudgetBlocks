@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(BACKEND_SOURCES
         backend/World.cpp
         backend/Block.cpp
+        backend/Chunk.cpp
         backend/Player.cpp
         backend/CameraView.cpp
         backend/CameraView.h
@@ -29,6 +30,8 @@ set(MAIN_SOURCE
 # ========== Group Sources ==========
 set(LOGIC_SOURCES
         ${BACKEND_SOURCES}
+        backend/WorldView.cpp
+        backend/WorldView.h
 )
 
 set(UI_SOURCES
