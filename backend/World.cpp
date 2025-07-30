@@ -14,6 +14,14 @@ void World::update(float deltaTime) {
     if (currentChunkCoord != PlayerChunkCoord) {
         // Player has moved to a different chunk, load the new chunk
         loadChunk(currentChunkCoord.x, currentChunkCoord.y, currentChunkCoord.z);
+        loadChunk(currentChunkCoord.x + 1, currentChunkCoord.y, currentChunkCoord.z);
+        loadChunk(currentChunkCoord.x - 1, currentChunkCoord.y, currentChunkCoord.z);
+        loadChunk(currentChunkCoord.x, currentChunkCoord.y, currentChunkCoord.z + 1);
+        loadChunk(currentChunkCoord.x, currentChunkCoord.y, currentChunkCoord.z - 1);
+        loadChunk(currentChunkCoord.x + 1, currentChunkCoord.y, currentChunkCoord.z + 1);
+        loadChunk(currentChunkCoord.x - 1, currentChunkCoord.y, currentChunkCoord.z - 1);
+        loadChunk(currentChunkCoord.x + 1, currentChunkCoord.y, currentChunkCoord.z - 1);
+        loadChunk(currentChunkCoord.x - 1, currentChunkCoord.y, currentChunkCoord.z + 1);
         PlayerChunkCoord = currentChunkCoord;
         updateWorldView();
     }
@@ -79,7 +87,16 @@ const Block &World::getBlock(int x, int y, int z) const {
 }
 
 World::World(std::shared_ptr<WorldView> view) : worldView(std::move(view)) {
-    loadChunk(0, 0, 0); // Load the initial chunk
+    // Load the initial chunks
+    loadChunk(0, 0, 0);
+    loadChunk(1, 0, 0);
+    loadChunk(-1, 0, 0);
+    loadChunk(0, 0, 1);
+    loadChunk(0, 0, -1);
+    loadChunk(1, 0, 1);
+    loadChunk(-1, 0, -1);
+    loadChunk(1, 0, -1);
+    loadChunk(-1, 0, 1);
     updateWorldView();
 }
 
@@ -91,14 +108,30 @@ void World::loadChunk(int x, int y, int z) {
 }
 
 void World::updateWorldView() {
-    std::vector<std::pair<BlockType, BlockCoord>> blockList = chunkMap[PlayerChunkCoord]->getBlocks();
+    std::vector<ChunkCoord> loadedChunks = {
+        {PlayerChunkCoord.x, PlayerChunkCoord.y, PlayerChunkCoord.z},
+        {PlayerChunkCoord.x + 1, PlayerChunkCoord.y, PlayerChunkCoord.z},
+        {PlayerChunkCoord.x - 1, PlayerChunkCoord.y, PlayerChunkCoord.z},
+        {PlayerChunkCoord.x, PlayerChunkCoord.y, PlayerChunkCoord.z + 1},
+        {PlayerChunkCoord.x, PlayerChunkCoord.y, PlayerChunkCoord.z - 1},
+        {PlayerChunkCoord.x + 1, PlayerChunkCoord.y, PlayerChunkCoord.z + 1},
+        {PlayerChunkCoord.x - 1, PlayerChunkCoord.y, PlayerChunkCoord.z - 1},
+        {PlayerChunkCoord.x + 1, PlayerChunkCoord.y, PlayerChunkCoord.z - 1},
+        {PlayerChunkCoord.x - 1, PlayerChunkCoord.y, PlayerChunkCoord.z + 1}
+    };
 
-    for (auto &BlockPair : blockList) {
-        BlockPair.second = BlockCoord{
-            BlockPair.second.x + PlayerChunkCoord.x * CHUNK_SIZE,
-            BlockPair.second.y + PlayerChunkCoord.y * CHUNK_SIZE,
-            BlockPair.second.z + PlayerChunkCoord.z * CHUNK_SIZE
-        };
+
+    std::vector<std::pair<BlockType, BlockCoord>> blockList;
+    for (const auto &chunkCoord : loadedChunks) {
+
+        for (auto &BlockPair : chunkMap[chunkCoord]->getBlocks()) {
+            BlockPair.second = BlockCoord{
+                BlockPair.second.x + chunkCoord.x * CHUNK_SIZE,
+                BlockPair.second.y + chunkCoord.y * CHUNK_SIZE,
+                BlockPair.second.z + chunkCoord.z * CHUNK_SIZE
+            };
+            blockList.emplace_back(BlockPair.first, BlockPair.second);
+        }
     }
 
     worldView->setBlocks(blockList);
