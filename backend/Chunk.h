@@ -33,6 +33,12 @@ public:
     }
 
     [[nodiscard]] std::vector<std::pair<BlockType, BlockCoord>> getBlocks() const;
+
+    void replaceBlock(int x, int y, int z, BlockType type);
+
+    [[nodiscard]] std::vector<Block> getBlockVector() const {
+        return blocks;
+    }
 private:
      bool inBounds(int x, int y, int z) const {
         return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE;

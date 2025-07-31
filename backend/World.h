@@ -61,6 +61,32 @@ private:
     int floorDiv(int a, int b) {
         return (a >= 0) ? (a / b) : ((a - b + 1) / b);
     }
+
+    int ceilFloat(float a) {
+        if (a >= 0) {
+            return ceilf(a);
+        } else {
+            return ceilf(a);
+        }
+    }
+
+    int roundFloat(float a) {
+        if (a >= 0) {
+            return floorf(a + 0.5f);
+        } else {
+            return ceilf(a - 0.5f);
+        }
+    }
+
+    int positive_mod(int a, int b) {
+        return (a % b + b) % b;
+    }
+
+    bool playerJumped = false;
+
+    void placeBlock();
+
+    void breakBlock();
 };
 
 

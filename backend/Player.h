@@ -13,6 +13,10 @@ class Player {
 public:
     [[nodiscard]] glm::vec3 getPosition() const;
 
+    [[nodiscard]] const glm::vec3& getOrientation() const {
+        return Orientation;
+    }
+
     std::shared_ptr<CameraView> getCamera() {
         return playercam;
     }
@@ -31,13 +35,16 @@ public:
 
     void jump();
     void notJumping();
+    [[nodiscard]] bool GetIsJumping() const {
+        return isJumping;
+    }
 
     void update(float deltaTime);
 
     void moveHead(float mouseX, float mouseY);
 private:
     glm::vec3 Position = glm::vec3(0.0f, 2.0f, 0.0f);
-    glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     std::shared_ptr<CameraView> playercam = std::make_shared<CameraView>(0, 0, Position);
@@ -45,14 +52,14 @@ private:
     bool firstClick = true;
 
     float verticalSpeed = 0.0f; // Vertical speed for jumping
-    float jumpSpeed = sqrt(2.0f * 9.81f * 1.0f); // Initial jump speed (assuming 1 meter jump height)
+    float jumpSpeed = sqrt(2.0f * 9.81f * 1.5f); // Initial jump speed (assuming 1 meter jump height)
     bool isJumping = false; // Flag to check if the player is jumping
 
     float initialSpeed = 0.05f;
     float speed = initialSpeed;
     float sensitivity = 150.0f;
 
-    float yaw = -90.0f;  // Facing toward negative Z
+    float yaw = 90.0f;  // Facing toward negative Z
     float pitch = 0.0f;  // Level with the horizon
 
     void updateCamera();

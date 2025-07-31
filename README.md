@@ -2,8 +2,7 @@
 
 ## ToDo
 
-- [ ] All inputs from camera should be provided by game to the world based on input enum and rotX rotY
-- [ ] Independent loop from GLWF
-- [ ] Store and reach blocks in world
-- [ ] Make worldView to render blocks
 - [ ] Make horizontal acceleration and deceleration
+- [ ] Fix the textures
+- [ ] Use perlin noise for terrain generation
+- [ ] Make upper and lower bounds for terrain generation

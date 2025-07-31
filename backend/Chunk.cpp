@@ -30,3 +30,8 @@ Chunk::Chunk() : blocks(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, Block(BlockType::A
         }
     }
 }
+
+void Chunk::replaceBlock(int x, int y, int z, BlockType type) {
+    assert(inBounds(x, y, z));
+    blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)] = Block(type);
+}

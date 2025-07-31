@@ -61,6 +61,13 @@ GLuint indices[] = {0, 1, 2, // front upper triangle
                     20, 22, 23 // Bottom lower triangle
 };
 
+float crosshairVertices[] = {
+        // Verticale lijn (x = 0)
+        0.0f, -0.015f, 0.0f, 0.015f,
+        // Horizontale lijn (y = 0)
+        -0.01f, 0.0f, 0.01f, 0.0f};
+
+
 int Game::run() {
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";
@@ -128,9 +135,22 @@ int Game::run() {
     Texture block("../resources/default_grass_side.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     block.texUnit(shaderProgram, "tex0", 0);
 
-    // Original code from the tutorial
-    /*Texture popCat("pop_cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    popCat.texUnit(shaderProgram, "tex0", 0);*/
+    Shader crosshairShader("../frontend/shaders/crosshair.vert", "../frontend/shaders/crosshair.frag");
+
+    unsigned int crossVAO, crossVBO;
+    glGenVertexArrays(1, &crossVAO);
+    glGenBuffers(1, &crossVBO);
+
+    glBindVertexArray(crossVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *) 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -174,15 +194,32 @@ int Game::run() {
 
         glm::vec3 blockCoordinate;
         // Draw blocks
-        for (auto &blockPair : worldView->getBlocks()) {
+        for (auto &blockPair: worldView->getBlocks()) {
             // Set the coordinate of the block;
             blockCoordinate = glm::vec3(blockPair.second.x, blockPair.second.y, blockPair.second.z);
             if (blockPair.first == BlockType::DIRT) {
-                glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1, glm::value_ptr(blockCoordinate));
+                glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1,
+                             glm::value_ptr(blockCoordinate));
                 // Draw primitives, number of indices, datatype of indices, index of indices
                 glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
             }
         }
+
+        // Disable depth testing to draw on top
+        glDisable(GL_DEPTH_TEST);
+
+        // Activeer 2D shader
+        crosshairShader.Activate();  // Gebruik een aparte Shader voor 2D
+        glBindVertexArray(crossVAO);
+        glLineWidth(2.0f);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDrawArrays(GL_LINES, 0, 4);
+        glBindVertexArray(0);
+
+        // Heractiveer depth test voor toekomstige renders
+        glEnable(GL_DEPTH_TEST);
+
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);
         // Take care of all GLFW events
@@ -205,6 +242,8 @@ int Game::run() {
 }
 
 bool firstClick = true;
+bool leftMousePressedLastFrame = false;
+bool rightMousePressedLastFrame = false;
 
 void Game::handleInput(GLFWwindow *window) {
     double mouseX, mouseY;
@@ -256,4 +295,24 @@ void Game::handleInput(GLFWwindow *window) {
         // Reset cursor to center
         glfwSetCursorPos(window, width / 2, height / 2);
     }
+
+    int leftState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+
+// Detect rising edge (button just pressed this frame)
+    if (leftState == GLFW_PRESS && !leftMousePressedLastFrame && !firstClick) {
+        world->handleInput(input::LEFT_CLICK);  // Run once on click
+    }
+
+// Update for next frame
+    leftMousePressedLastFrame = (leftState == GLFW_PRESS);
+
+    int rightState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+
+// Detect rising edge (button just pressed this frame)
+    if (rightState == GLFW_PRESS && !rightMousePressedLastFrame && !firstClick) {
+        world->handleInput(input::RIGHT_CLICK);  // Run once on click
+    }
+
+// Update for next frame
+    rightMousePressedLastFrame = (rightState == GLFW_PRESS);
 }
