@@ -18,30 +18,42 @@
 #include "../utils.h"
 #include "../backend/CameraView.h"
 
+struct FaceUV {
+    GLfloat u1, v1, u2, v2; // bottom-left and top-right UV
+};
+
+struct BlockTextureUV {
+    FaceUV top;
+    FaceUV bottom;
+    FaceUV side;
+};
+
+
+
 // Vertices coordinates
 GLfloat vertices[] = { //     COORDINATES     /        COLORS      /         TexCoord  //   face | height | side from front perspective
-        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Front bottom left
-        -0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Front top left
-        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Front top right
-        0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Front bottom right
-        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Back bottom left
-        -0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Back top left
-        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Back top right
-        0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Back bottom right
-        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Left bottom left
-        -0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Left top left
-        -0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Left top right
-        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Left bottom right
-        0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Right bottom left
-        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Right top left
-        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Right top right
-        0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Right bottom right
+        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 0.0f, // Front bottom left
+        -0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 1.0f, // Front top left
+        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 1.0f, // Front top right
+        0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 0.0f, // Front bottom right
+        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 0.0f, // Back bottom left
+        -0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 1.0f, // Back top left
+        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 1.0f, // Back top right
+        0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 0.0f, // Back bottom right
+        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 0.0f, // Left bottom left
+        -0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 1.0f, // Left top left
+        -0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 1.0f, // Left top right
+        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 0.0f, // Left bottom right
+        0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 0.0f, // Right bottom left
+        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.334f, 1.0f, // Right top left
+        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 1.0f, // Right top right
+        0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.666f, 0.0f, // Right bottom right
         -0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Top bottom left
         -0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Top top left
-        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Top top right
-        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Top Bottom right
-        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, // Bottom bottom left
-        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 1.0f, // Bottom top left
+        0.5f, 0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.33f, 1.0f, // Top top right
+        0.5f, 0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.33f, 0.0f, // Top Bottom right
+        -0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 0.667f, 0.0f, // Bottom bottom left
+        -0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 0.667f, 1.0f, // Bottom top left
         0.5f, -0.5f, 0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 1.0f, // Bottom top right
         0.5f, -0.5f, -0.5f, 0.83f, 0.70f, 0.44f, 1.0f, 0.0f, // Bottom bottom right
 };
@@ -132,7 +144,7 @@ int Game::run() {
     EBO1.Unbind();
 
     // Texture
-    Texture block("../resources/default_grass_side.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    Texture block("../resources/grassTexture.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     block.texUnit(shaderProgram, "tex0", 0);
 
     Shader crosshairShader("../frontend/shaders/crosshair.vert", "../frontend/shaders/crosshair.frag");
@@ -198,6 +210,11 @@ int Game::run() {
             // Set the coordinate of the block;
             blockCoordinate = glm::vec3(blockPair.second.x, blockPair.second.y, blockPair.second.z);
             if (blockPair.first == BlockType::DIRT) {
+                glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1,
+                             glm::value_ptr(blockCoordinate));
+                // Draw primitives, number of indices, datatype of indices, index of indices
+                glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+            } else if (blockPair.first == BlockType::GRASS) {
                 glUniform3fv(glGetUniformLocation(shaderProgram.ID, "BlockCoordinate"), 1,
                              glm::value_ptr(blockCoordinate));
                 // Draw primitives, number of indices, datatype of indices, index of indices

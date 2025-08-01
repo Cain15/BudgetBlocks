@@ -164,7 +164,7 @@ void World::updateWorldView() {
 }
 
 void World::placeBlock() {
-    for (int i = 10; i < 60; i++) {
+    for (int i = 10; i < 70; i++) {
         glm::vec3 coord = player->getPosition() + (player->getOrientation() * (float) i * 0.1f);
         const Block &block = getBlock(roundFloat(coord.x), roundFloat(coord.y), roundFloat(coord.z));
         std::cout << "Checking solid at: " << roundFloat(coord.x) << ", " << roundFloat(coord.y) << ", "
