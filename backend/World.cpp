@@ -12,16 +12,19 @@ void World::update(float deltaTime) {
     glm::vec3 playerPosition = player->getPosition();
     if (playerPosition.x < 0.0f) {
         playerPosition.x = 0.0f; // Prevent player from going out of bounds
-        player->setPosition(glm::vec3(0.0f, playerPosition.y, playerPosition.z)); // Prevent player from going out of bounds
+        player->setPosition(
+                glm::vec3(0.0f, playerPosition.y, playerPosition.z)); // Prevent player from going out of bounds
     }
     if (playerPosition.y < 0.0f) {
         playerPosition.y = 0.0f; // Prevent player from going out of bounds
-        player->setPosition(glm::vec3(playerPosition.x, 0.0f, playerPosition.z)); // Prevent player from going out of bounds
+        player->setPosition(
+                glm::vec3(playerPosition.x, 0.0f, playerPosition.z)); // Prevent player from going out of bounds
         player->notJumping(); // Reset jump state if player is below ground
     }
     if (playerPosition.z < 0.0f) {
         playerPosition.z = 0.0f; // Prevent player from going out of bounds
-        player->setPosition(glm::vec3(playerPosition.x, playerPosition.y, 0.0f)); // Prevent player from going out of bounds
+        player->setPosition(
+                glm::vec3(playerPosition.x, playerPosition.y, 0.0f)); // Prevent player from going out of bounds
     }
     ChunkCoord currentChunkCoord = getChunkCoord(playerPosition.x, playerPosition.y, playerPosition.z);
     if (currentChunkCoord != PlayerChunkCoord) {
@@ -69,14 +72,26 @@ void World::handleInput(input info, std::pair<float, float> mousePosition) {
         case input::FORWARD:
             player->forward();
             break;
+        case input::RELEASE_FORWARD:
+            player->releaseForward();
+            break;
         case input::BACKWARD:
             player->backward();
+            break;
+        case input::RELEASE_BACKWARD:
+            player->releaseBackward();
             break;
         case input::LEFT:
             player->left();
             break;
+        case input::RELEASE_LEFT:
+            player->releaseLeft();
+            break;
         case input::RIGHT:
             player->right();
+            break;
+        case input::RELEASE_RIGHT:
+            player->releaseRight();
             break;
         case input::JUMP:
             player->jump();
@@ -167,17 +182,18 @@ void World::placeBlock() {
     for (int i = 10; i < 70; i++) {
         glm::vec3 coord = player->getPosition() + (player->getOrientation() * (float) i * 0.1f);
         const Block &block = getBlock(roundFloat(coord.x), roundFloat(coord.y), roundFloat(coord.z));
-        std::cout << "Checking solid at: " << roundFloat(coord.x) << ", " << roundFloat(coord.y) << ", "
-                  << roundFloat(coord.z) << std::endl;
         if (block.getType() != BlockType::AIR) {
+            int j = 0;
             while (getBlock(roundFloat(coord.x), roundFloat(coord.y), roundFloat(coord.z)).getType() !=
-                   BlockType::AIR) {
+                   BlockType::AIR && j < i) {
                 coord -= player->getOrientation() * 0.1f;
+                j++;
+            }
+            if (absolute(coord.x - player->getPosition().x) <= 1.0f &&
+                absolute(coord.y - player->getPosition().y) <= 2.0f && absolute(coord.z - player->getPosition().z) <= 1.0f) {
+                break;
             }
             ChunkCoord chunkCoord = getChunkCoord(roundFloat(coord.x), roundFloat(coord.y), roundFloat(coord.z));
-            std::cout << "Placing block at " << roundFloat(coord.x) << ", " << roundFloat(coord.y) << ", "
-                      << roundFloat(coord.z) << " in chunk " << chunkCoord.x << ", " << chunkCoord.y << ", "
-                      << chunkCoord.z << std::endl;
             if (chunkMap.find(chunkCoord) == chunkMap.end()) {
                 loadChunk(chunkCoord.x, chunkCoord.y, chunkCoord.z);
             }

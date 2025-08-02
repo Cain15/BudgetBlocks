@@ -268,14 +268,26 @@ void Game::handleInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         world->handleInput(input::FORWARD);
     }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE) {
+        world->handleInput(input::RELEASE_FORWARD);
+    }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         world->handleInput(input::BACKWARD);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE) {
+        world->handleInput(input::RELEASE_BACKWARD);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         world->handleInput(input::LEFT);
     }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE) {
+        world->handleInput(input::RELEASE_LEFT);
+    }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         world->handleInput(input::RIGHT);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE) {
+        world->handleInput(input::RELEASE_RIGHT);
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         world->handleInput(input::JUMP);

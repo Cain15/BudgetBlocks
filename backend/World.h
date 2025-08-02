@@ -82,6 +82,10 @@ private:
         return (a % b + b) % b;
     }
 
+    float absolute(float a) {
+        return (a >= 0) ? a : -a;
+    }
+
     bool playerJumped = false;
 
     void placeBlock();

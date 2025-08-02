@@ -7,9 +7,13 @@
 
 enum class input {
     FORWARD,
+    RELEASE_FORWARD,
     BACKWARD,
+    RELEASE_BACKWARD,
     LEFT,
+    RELEASE_LEFT,
     RIGHT,
+    RELEASE_RIGHT,
     JUMP,
     SNEAK,
     SPRINT,

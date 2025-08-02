@@ -4,18 +4,16 @@
 
 #include "Player.h"
 #include <iostream>
+#include <algorithm>
 
 glm::vec3 Player::getPosition() const {
     return Position;
 }
 
 void Player::forward() {
-    if (isJumping) {
-        // If the player is jumping, you have less momentum
-        Position += 0.1f * speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
-    } else {
-        Position += speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
-    }
+    forwardPressed = true;
+    accelerating = true;
+    updateSpeedDirection();
 }
 
 void Player::moveHead(float mouseX, float mouseY) {
@@ -48,15 +46,21 @@ void Player::updateCamera() {
 }
 
 void Player::backward() {
-    Position -= speed * glm::normalize(glm::vec3(Orientation.x, 0.0f, Orientation.z));
+    backwardPressed = true;
+    accelerating = true;
+    updateSpeedDirection();
 }
 
 void Player::left() {
-    Position += 0.8f * speed * -glm::normalize(glm::cross(Orientation, Up));
+    leftPressed = true;
+    accelerating = true;
+    updateSpeedDirection();
 }
 
 void Player::right() {
-    Position += 0.8f * speed * glm::normalize(glm::cross(Orientation, Up));
+    rightPressed = true;
+    accelerating = true;
+    updateSpeedDirection();
 }
 
 void Player::jump() {
@@ -73,6 +77,12 @@ void Player::setPosition(const glm::vec3 &position) {
 
 void Player::update(float deltaTime) {
     Position += glm::vec3(0.0f, verticalSpeed * deltaTime, 0.0f); // Apply vertical speed to position
+    Position += speed * speedDirection * (deltaTime); // Apply horizontal speed to position
+    if (accelerating && !isJumping) {
+        speed = std::min(initialSpeed, speed + 4.317f * deltaTime); // Accelerate up to a maximum speed
+    } else if (!isJumping){
+        speed = std::max(0.0f, speed - 4.317f * deltaTime); // Gradually reduce speed when not accelerating
+    }
     updateCamera();
 }
 
@@ -83,4 +93,58 @@ void Player::notJumping() {
 
 void Player::addVerticalSpeed(float speed) {
     verticalSpeed += speed;
+}
+
+void Player::releaseForward() {
+    forwardPressed = false;
+    keyRelease();
+}
+
+void Player::updateSpeedDirection() {
+    glm::vec3 forward = glm::vec3(Orientation.x, 0.0f, Orientation.z);
+    if (glm::length(forward) > 0.0001f) {
+        forward = glm::normalize(forward);
+    }
+
+    speedDirection = glm::vec3(0.0f);
+    if (forwardPressed) {
+        speedDirection += forward;
+    }
+    if (backwardPressed) {
+        speedDirection = glm::vec3(speedDirection.x - forward.x, speedDirection.y - forward.y, speedDirection.z - forward.z); // Move backward in the opposite direction
+    }
+
+    glm::vec3 right = glm::normalize(glm::cross(Orientation, Up));
+    if (leftPressed) {
+        speedDirection -= right;
+    }
+    if (rightPressed) {
+        speedDirection += right;
+    }
+
+    if (glm::length(speedDirection) > 0.0001f) {
+        speedDirection = glm::normalize(speedDirection);
+    }
+}
+
+void Player::releaseBackward() {
+    backwardPressed = false;
+    keyRelease();
+}
+
+void Player::keyRelease() {
+    if (!forwardPressed && !backwardPressed && !leftPressed && !rightPressed) {
+        accelerating = false; // Stop accelerating if no keys are pressed
+    }
+    updateSpeedDirection(); // Update speed direction based on current key states
+}
+
+void Player::releaseLeft() {
+    leftPressed = false;
+    keyRelease();
+}
+
+void Player::releaseRight() {
+    rightPressed = false;
+    keyRelease();
 }

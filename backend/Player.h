@@ -27,11 +27,19 @@ public:
 
     void forward();
 
+    void releaseForward();
+
     void backward();
+
+    void releaseBackward();
 
     void left();
 
+    void releaseLeft();
+
     void right();
+
+    void releaseRight();
 
     void jump();
     void notJumping();
@@ -55,14 +63,25 @@ private:
     float jumpSpeed = sqrt(2.0f * 9.81f * 1.5f); // Initial jump speed (assuming 1 meter jump height)
     bool isJumping = false; // Flag to check if the player is jumping
 
-    float initialSpeed = 0.05f;
-    float speed = initialSpeed;
+    bool accelerating = false; // Flag to check if the player is accelerating
+    float initialSpeed = 4.317f;
+    float speed = 0.0f;
     float sensitivity = 150.0f;
+    glm::vec3 speedDirection = glm::vec3(0.0f, 0.0f, 0.0f); // Direction of speed
 
     float yaw = 90.0f;  // Facing toward negative Z
     float pitch = 0.0f;  // Level with the horizon
 
     void updateCamera();
+
+    bool forwardPressed = false;
+    bool backwardPressed = false;
+    bool leftPressed = false;
+    bool rightPressed = false;
+
+    void updateSpeedDirection();
+
+    void keyRelease();
 };
 
 
