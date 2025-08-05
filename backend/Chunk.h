@@ -11,10 +11,10 @@
 #include <cassert>
 
 struct ChunkCoord {
-    int x, y, z;
+    int x, z;
 
     bool operator==(const ChunkCoord &other) const {
-        return x == other.x && y == other.y && z == other.z;
+        return x == other.x && z == other.z;
     }
 };
 
@@ -28,8 +28,12 @@ public:
     Chunk();
 
     [[nodiscard]] const Block &getBlock(int x, int y, int z) const{
-        assert(inBounds(x, y, z));
-        return blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)];
+        if (inBounds(x, y, z)){
+            return blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)];
+        } else {
+            static Block airBlock{BlockType::AIR}; // Return an air block if out of bounds
+            return airBlock;
+        }
     }
 
     [[nodiscard]] std::vector<std::pair<BlockType, BlockCoord>> getBlocks() const;

@@ -17,9 +17,8 @@
 struct ChunkCoordHash {
     std::size_t operator()(const ChunkCoord &coord) const {
         std::size_t hx = std::hash<int>()(coord.x);
-        std::size_t hy = std::hash<int>()(coord.y);
         std::size_t hz = std::hash<int>()(coord.z);
-        return hx ^ (hy << 1) ^ (hz << 2);
+        return hx ^ (hz << 1);
     }
 };
 
@@ -46,12 +45,12 @@ private:
 
     const Block &getBlock(int x, int y, int z) const;
 
-    ChunkCoord PlayerChunkCoord = {0, 0, 0}; // The chunk the player is currently in
+    ChunkCoord PlayerChunkCoord = {0, 0}; // The chunk the player is currently in
 
-    void loadChunk(int x, int y, int z);
+    void loadChunk(int x, int z);
 
-    ChunkCoord getChunkCoord(int x, int y, int z) {
-        return {floorDiv(x,16), floorDiv(y,16), floorDiv(z,16)};
+    ChunkCoord getChunkCoord(int x, int z) {
+        return {floorDiv(x,16), floorDiv(z,16)};
     }
 
     std::shared_ptr<WorldView> worldView;
