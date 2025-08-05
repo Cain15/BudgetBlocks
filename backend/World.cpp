@@ -5,6 +5,7 @@
 #include "World.h"
 #include <glm/glm.hpp>
 #include <iostream>
+#include <stb/stb_perlin.h>
 
 void World::update(float deltaTime) {
     player->update(deltaTime);
@@ -139,12 +140,43 @@ World::World(std::shared_ptr<WorldView> view) : worldView(std::move(view)) {
     loadChunk(1, 0);
     loadChunk(0, 1);
     loadChunk(1, 1);
+    // Move player to a solid ground position, not in a block
+    for (int y = 0; y < 30 ; y++) {
+        if (getBlock(0, y, 0).getType() != BlockType::AIR) {
+            player->setPosition(glm::vec3(0.0f, y + 2.0f, 0.0f)); // Set player above the ground
+            break;
+        }
+    }
     updateWorldView();
 }
 
 void World::loadChunk(int x, int z) {
-    if (chunkMap.find({x, z}) == chunkMap.end()) {
-        chunkMap[{x, z}] = std::make_unique<Chunk>();
+    ChunkCoord coord = {x, z};
+    if (chunkMap.find(coord) == chunkMap.end()) {
+        auto chunk = std::make_unique<Chunk>();
+
+        for (int cx = 0; cx < 16; ++cx) {
+            for (int cz = 0; cz < 16; ++cz) {
+                int worldX = x * 16 + cx;
+                int worldZ = z * 16 + cz;
+
+                // Scale to avoid too steep terrain
+                float noiseX = worldX * 0.05f;
+                float noiseZ = worldZ * 0.05f;
+
+                // Get Perlin noise value
+                float height = stb_perlin_noise3(noiseX, 0.0f, noiseZ, 0, 0, 0);
+
+                // Scale to desired terrain height
+                int terrainHeight = static_cast<int>(height * 10.0f + 20.0f); // e.g., from y = 10 to 30
+
+                for (int y = 0; y < terrainHeight; ++y) {
+                    chunk->replaceBlock(cx, y, cz, BlockType::GRASS); // Replace with your actual block setting
+                }
+            }
+        }
+
+        chunkMap[coord] = std::move(chunk);
     }
 }
 
@@ -200,7 +232,7 @@ void World::placeBlock() {
                 loadChunk(chunkCoord.x, chunkCoord.z);
             }
             chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE),
-                                               positive_mod(roundFloat(coord.y), CHUNK_SIZE),
+                                               roundFloat(coord.y),
                                                positive_mod(roundFloat(coord.z), CHUNK_SIZE), BlockType::DIRT);
             updateWorldView();
             break;
@@ -221,7 +253,7 @@ void World::breakBlock() {
                 loadChunk(chunkCoord.x, chunkCoord.z);
             }
             chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE),
-                                               positive_mod(roundFloat(coord.y), CHUNK_SIZE),
+                                               roundFloat(coord.y),
                                                positive_mod(roundFloat(coord.z), CHUNK_SIZE), BlockType::AIR);
             updateWorldView();
             break;

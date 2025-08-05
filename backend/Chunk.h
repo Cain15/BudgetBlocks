@@ -19,6 +19,7 @@ struct ChunkCoord {
 };
 
 const int CHUNK_SIZE = 16;
+const int CHUNK_HEIGHT = 32; // Assuming a fixed height for simplicity
 
 
 class Chunk {
@@ -29,7 +30,7 @@ public:
 
     [[nodiscard]] const Block &getBlock(int x, int y, int z) const{
         if (inBounds(x, y, z)){
-            return blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)];
+            return blocks[getIndex(x, y, z)];
         } else {
             static Block airBlock{BlockType::AIR}; // Return an air block if out of bounds
             return airBlock;
@@ -45,7 +46,11 @@ public:
     }
 private:
      bool inBounds(int x, int y, int z) const {
-        return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE;
+        return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE;
+    }
+
+    int getIndex(int x, int y, int z) const {
+        return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
     }
 };
 
