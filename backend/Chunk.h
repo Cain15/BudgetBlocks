@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "Block.h"
-#include "../utils.h"
 #include <cassert>
 
 struct ChunkCoord {
@@ -15,6 +14,10 @@ struct ChunkCoord {
 
     bool operator==(const ChunkCoord &other) const {
         return x == other.x && z == other.z;
+    }
+
+    bool operator!=(const ChunkCoord& other) const {
+        return x != other.x || z != other.z;
     }
 };
 
@@ -45,11 +48,11 @@ public:
         return blocks;
     }
 private:
-     bool inBounds(int x, int y, int z) const {
+     static bool inBounds(int x, int y, int z) {
         return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE;
     }
 
-    int getIndex(int x, int y, int z) const {
+    [[nodiscard]] inline int getIndex(int x, int y, int z) const {
         return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
     }
 };

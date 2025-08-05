@@ -38,4 +38,9 @@ struct BlockCoord {
     }
 };
 
+namespace Variables {
+    const int renderDistance = 6;
+    const int seed = 15;
+}
+
 #endif //BUDGETBLOCKS_UTILS_H

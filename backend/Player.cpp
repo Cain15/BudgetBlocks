@@ -79,9 +79,9 @@ void Player::update(float deltaTime) {
     Position += glm::vec3(0.0f, verticalSpeed * deltaTime, 0.0f); // Apply vertical speed to position
     Position += speed * speedDirection * (deltaTime); // Apply horizontal speed to position
     if (accelerating && !isJumping) {
-        speed = std::min(initialSpeed, speed + 4.317f * deltaTime); // Accelerate up to a maximum speed
+        speed = std::min(initialSpeed, speed + 4.317f * 2 * deltaTime); // Accelerate up to a maximum speed
     } else if (!isJumping){
-        speed = std::max(0.0f, speed - 4.317f * deltaTime); // Gradually reduce speed when not accelerating
+        speed = std::max(0.0f, speed - 4.317f * 2 * deltaTime); // Gradually reduce speed when not accelerating
     }
     updateCamera();
 }

@@ -60,7 +60,7 @@ private:
     bool firstClick = true;
 
     float verticalSpeed = 0.0f; // Vertical speed for jumping
-    float jumpSpeed = sqrt(2.0f * 9.81f * 1.5f); // Initial jump speed (assuming 1 meter jump height)
+    float jumpSpeed = sqrt(2.0f * 9.81f * 1.2f); // Initial jump speed (assuming 1 meter jump height)
     bool isJumping = false; // Flag to check if the player is jumping
 
     bool accelerating = false; // Flag to check if the player is accelerating

@@ -16,10 +16,10 @@ void World::update(float deltaTime) {
         player->setPosition(
                 glm::vec3(0.0f, playerPosition.y, playerPosition.z)); // Prevent player from going out of bounds
     }
-    if (playerPosition.y < 0.0f) {
-        playerPosition.y = 0.0f; // Prevent player from going out of bounds
+    if (playerPosition.y < 1.0f) {
+        playerPosition.y = 1.0f; // Prevent player from going out of bounds
         player->setPosition(
-                glm::vec3(playerPosition.x, 0.0f, playerPosition.z)); // Prevent player from going out of bounds
+                glm::vec3(playerPosition.x, 1.0f, playerPosition.z)); // Prevent player from going out of bounds
         player->notJumping(); // Reset jump state if player is below ground
     }
     if (playerPosition.z < 0.0f) {
@@ -29,22 +29,7 @@ void World::update(float deltaTime) {
     }
     ChunkCoord currentChunkCoord = getChunkCoord(playerPosition.x, playerPosition.z);
     if (currentChunkCoord != PlayerChunkCoord) {
-        // Player has moved to a different chunk, load the new chunk
-        loadChunk(currentChunkCoord.x, currentChunkCoord.z);
-        loadChunk(currentChunkCoord.x + 1, currentChunkCoord.z);
-        loadChunk(currentChunkCoord.x, currentChunkCoord.z + 1);
-        loadChunk(currentChunkCoord.x + 1, currentChunkCoord.z + 1);
-        if (currentChunkCoord.x - 1 >= 0) {
-            loadChunk(currentChunkCoord.x - 1, currentChunkCoord.z);
-            loadChunk(currentChunkCoord.x - 1, currentChunkCoord.z + 1);
-            if (currentChunkCoord.z - 1 >= 0) {
-                loadChunk(currentChunkCoord.x - 1, currentChunkCoord.z - 1);
-            }
-        }
-        if (currentChunkCoord.z - 1 >= 0) {
-            loadChunk(currentChunkCoord.x, currentChunkCoord.z - 1);
-            loadChunk(currentChunkCoord.x + 1, currentChunkCoord.z - 1);
-        }
+        loadChunksAround(currentChunkCoord);
         PlayerChunkCoord = currentChunkCoord;
         updateWorldView();
     }
@@ -135,15 +120,12 @@ const Block &World::getBlock(int x, int y, int z) const {
 }
 
 World::World(std::shared_ptr<WorldView> view) : worldView(std::move(view)) {
-    // Load the initial chunks
-    loadChunk(0, 0);
-    loadChunk(1, 0);
-    loadChunk(0, 1);
-    loadChunk(1, 1);
+    loadChunksAround({3, 3}); // Load initial chunks around the player
     // Move player to a solid ground position, not in a block
     for (int y = 0; y < 30 ; y++) {
-        if (getBlock(0, y, 0).getType() != BlockType::AIR) {
-            player->setPosition(glm::vec3(0.0f, y + 2.0f, 0.0f)); // Set player above the ground
+        auto block = getBlock(0, y, 0);
+        if (getBlock(50, y, 50).getType() == BlockType::AIR) {
+            player->setPosition(glm::vec3(50.0f, y + 1.0f, 50.0f)); // Set player above the ground
             break;
         }
     }
@@ -165,10 +147,10 @@ void World::loadChunk(int x, int z) {
                 float noiseZ = worldZ * 0.05f;
 
                 // Get Perlin noise value
-                float height = stb_perlin_noise3(noiseX, 0.0f, noiseZ, 0, 0, 0);
+                float height = stb_perlin_noise3_seed(noiseX, 0.0f, noiseZ, 0, 0, 0, Variables::seed);
 
                 // Scale to desired terrain height
-                int terrainHeight = static_cast<int>(height * 10.0f + 20.0f); // e.g., from y = 10 to 30
+                int terrainHeight = static_cast<int>(height * 5.0f + 20.0f);
 
                 for (int y = 0; y < terrainHeight; ++y) {
                     chunk->replaceBlock(cx, y, cz, BlockType::GRASS); // Replace with your actual block setting
@@ -181,30 +163,36 @@ void World::loadChunk(int x, int z) {
 }
 
 void World::updateWorldView() {
-    std::vector<ChunkCoord> loadedChunks = {{PlayerChunkCoord.x, PlayerChunkCoord.z},
-                                            {PlayerChunkCoord.x + 1, PlayerChunkCoord.z},
-                                            {PlayerChunkCoord.x, PlayerChunkCoord.z + 1},
-                                            {PlayerChunkCoord.x + 1, PlayerChunkCoord.z + 1},};
-    if (PlayerChunkCoord.x - 1 >= 0) {
-        loadedChunks.emplace_back(PlayerChunkCoord.x - 1, PlayerChunkCoord.z);
-        loadedChunks.emplace_back(PlayerChunkCoord.x - 1, PlayerChunkCoord.z + 1);
-        if (PlayerChunkCoord.z - 1 >= 0) {
-            loadedChunks.emplace_back(PlayerChunkCoord.x - 1, PlayerChunkCoord.z - 1);
+    std::vector<ChunkCoord> loadedChunks;
+
+    int rd = Variables::renderDistance;
+
+    // Generate all chunk coordinates in a square around PlayerChunkCoord within render distance
+    for (int dx = -rd; dx <= rd; ++dx) {
+        int chunkX = PlayerChunkCoord.x + dx;
+        if (chunkX < 0) continue; // skip negative chunk coords if your world doesn't support them
+
+        for (int dz = -rd; dz <= rd; ++dz) {
+            int chunkZ = PlayerChunkCoord.z + dz;
+            if (chunkZ < 0) continue;
+
+            loadedChunks.emplace_back(chunkX, chunkZ);
         }
     }
-    if (PlayerChunkCoord.z - 1 >= 0) {
-        loadedChunks.emplace_back(PlayerChunkCoord.x, PlayerChunkCoord.z - 1);
-        loadedChunks.emplace_back(PlayerChunkCoord.x + 1, PlayerChunkCoord.z - 1);
-    }
-
 
     std::vector<std::pair<BlockType, BlockCoord>> blockList;
+
     for (const auto &chunkCoord: loadedChunks) {
+        // Make sure chunk exists in chunkMap before dereferencing
+        if (chunkMap.find(chunkCoord) == chunkMap.end()) continue;
 
         for (auto &BlockPair: chunkMap[chunkCoord]->getBlocks()) {
-            BlockPair.second = BlockCoord{BlockPair.second.x + chunkCoord.x * CHUNK_SIZE,
-                                          BlockPair.second.y,
-                                          BlockPair.second.z + chunkCoord.z * CHUNK_SIZE};
+            // Adjust block world position based on chunk position and chunk size
+            BlockPair.second = BlockCoord{
+                    BlockPair.second.x + chunkCoord.x * CHUNK_SIZE,
+                    BlockPair.second.y,
+                    BlockPair.second.z + chunkCoord.z * CHUNK_SIZE
+            };
             blockList.emplace_back(BlockPair.first, BlockPair.second);
         }
     }
@@ -245,8 +233,6 @@ void World::breakBlock() {
     for (int i = 10; i < 60; i++) {
         glm::vec3 coord = player->getPosition() + (player->getOrientation() * (float) i * 0.1f);
         const Block &block = getBlock(roundFloat(coord.x), roundFloat(coord.y), roundFloat(coord.z));
-        std::cout << "Checking solid at: " << roundFloat(coord.x) << ", " << roundFloat(coord.y) << ", "
-                  << roundFloat(coord.z) << std::endl;
         if (block.getType() != BlockType::AIR) {
             ChunkCoord chunkCoord = getChunkCoord(roundFloat(coord.x), roundFloat(coord.z));
             if (chunkMap.find(chunkCoord) == chunkMap.end()) {
@@ -257,6 +243,22 @@ void World::breakBlock() {
                                                positive_mod(roundFloat(coord.z), CHUNK_SIZE), BlockType::AIR);
             updateWorldView();
             break;
+        }
+    }
+}
+
+void World::loadChunksAround(const ChunkCoord &currentChunkCoord) {
+    // Loop through all chunk coordinates within render distance
+    int renderDistance = Variables::renderDistance;
+    for (int dx = -renderDistance; dx <= renderDistance; ++dx) {
+        for (int dz = -renderDistance; dz <= renderDistance; ++dz) {
+            int chunkX = currentChunkCoord.x + dx;
+            int chunkZ = currentChunkCoord.z + dz;
+
+            // Optional: Ensure chunk coords are non-negative (if your world doesn't allow negative chunks)
+            if (chunkX >= 0 && chunkZ >= 0) {
+                loadChunk(chunkX, chunkZ);
+            }
         }
     }
 }

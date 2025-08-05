@@ -90,6 +90,8 @@ private:
     void placeBlock();
 
     void breakBlock();
+
+    void loadChunksAround(const ChunkCoord& currentChunkCoord);
 };
 
 

@@ -9,13 +9,21 @@ std::vector<std::pair<BlockType, BlockCoord>> Chunk::getBlocks() const {
     std::vector<std::pair<BlockType, BlockCoord>> blockList;
 
     for (int x = 0; x < CHUNK_SIZE; ++x) {
-        for (int y = 0; y < CHUNK_HEIGHT; ++y) {
-            for (int z = 0; z < CHUNK_SIZE; ++z) {
+        for (int z = 0; z < CHUNK_SIZE; ++z) {
+            for (int y = 0; y < CHUNK_HEIGHT; ++y) {
                 int index = getIndex(x, y, z);
-                const Block& block = blocks[index];
+                const Block &block = blocks[index];
 
-                if (block.getType()) {
-                    blockList.emplace_back(block.getType(), BlockCoord{x, y, z});
+                if (x > 1 && blocks[getIndex(x-1,y,z)].getType() == BlockType::AIR ||
+                    x < CHUNK_SIZE - 2 && blocks[getIndex(x+1,y,z)].getType() == BlockType::AIR ||
+                    z > 1 && blocks[getIndex(x,y,z-1)].getType() == BlockType::AIR ||
+                    z < CHUNK_SIZE - 2 && blocks[getIndex(x,y,z+1)].getType() == BlockType::AIR ||
+                    y > 1 && blocks[getIndex(x,y-1,z)].getType() == BlockType::AIR ||
+                    y < CHUNK_HEIGHT - 2 && blocks[getIndex(x,y+1,z)].getType() == BlockType::AIR) {
+
+                    if (block.getType() != BlockType::AIR) {
+                        blockList.emplace_back(block.getType(), BlockCoord{x, y, z});
+                    }
                 }
             }
         }

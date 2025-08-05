@@ -182,6 +182,7 @@ int Game::run() {
         }
         float deltaTime = static_cast<float>(glfwGetTime()) - startTime;
         float fps = 1.0f / deltaTime;
+        std::cout << "FPS: " << fps << std::endl;
         startTime = static_cast<float>(glfwGetTime());
 
         world->update(deltaTime);

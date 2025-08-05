@@ -2,5 +2,6 @@
 
 ## ToDo
 
-- [ ] Use perlin noise for terrain generation
-- [ ] Make upper and lower bounds for terrain generation and remove z axis for chunks
+- [ ] Collision detection
+- [ ] Complete input handling
+- [ ] Don't render blocks that are not visible
