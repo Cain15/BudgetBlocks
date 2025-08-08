@@ -73,10 +73,12 @@ void Player::jump() {
 void Player::setPosition(const glm::vec3 &position) {
     Position = position;
     updateCamera();
+    updateHitBox();
 }
 
 void Player::update(float deltaTime) {
     Position += glm::vec3(0.0f, verticalSpeed * deltaTime, 0.0f); // Apply vertical speed to position
+    lastPosition = Position; // Store the last position for collision detection
     Position += speed * speedDirection * (deltaTime); // Apply horizontal speed to position
     if (accelerating && !isJumping) {
         speed = std::min(initialSpeed, speed + 4.317f * 2 * deltaTime); // Accelerate up to a maximum speed
@@ -147,4 +149,13 @@ void Player::releaseLeft() {
 void Player::releaseRight() {
     rightPressed = false;
     keyRelease();
+}
+
+void Player::updateHitBox() {
+    hitBox.min = Position + glm::vec3(-0.25f, -1.79f, -0.25f);
+    hitBox.max = Position + glm::vec3(0.25f, 0.0f, 0.25f);
+}
+
+const glm::vec3 &Player::getLastPosition() const {
+    return lastPosition;
 }

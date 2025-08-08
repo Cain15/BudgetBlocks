@@ -38,18 +38,25 @@ void World::update(float deltaTime) {
     bool isOnSolidGround = false;
     // Check if the player is on solid ground
     const Block &blockBelow = getBlock(roundFloat(playerPosition.x),
-                                       ceilFloat(playerPosition.y) - 2, // Check the block below the player
+                                       ceilFloat(playerPosition.y - 1.8), // Check the block below the player
                                        roundFloat(playerPosition.z));
-    if (blockBelow.getType() != BlockType::AIR && playerPosition.y - 2.0f <= ceilFloat(playerPosition.y) - 2.0f) {
+    if (blockBelow.getType() != BlockType::AIR && playerPosition.y - 1.8f <= ceilFloat(playerPosition.y) - 1.8f) {
         isOnSolidGround = true;
     }
     if (!isOnSolidGround) {
         player->addVerticalSpeed(-9.81f * deltaTime); // Apply gravity
     } else if (!playerJumped) {
-        player->setPosition(glm::vec3(playerPosition.x, ceilFloat(playerPosition.y), playerPosition.z));
+        player->setPosition(glm::vec3(playerPosition.x, ceilFloat(playerPosition.y) - 0.2f, playerPosition.z));
         player->notJumping();
     } else {
         playerJumped = false; // Reset jump flag after handling jump
+    }
+
+    if (getBlock(roundFloat(playerPosition.x), ceilFloat(playerPosition.y - 1),
+                 roundFloat(playerPosition.z)).getType() != BlockType::AIR ||
+        getBlock(roundFloat(playerPosition.x), ceilFloat(playerPosition.y), roundFloat(playerPosition.z)).getType() !=
+        BlockType::AIR) {
+        player->setPosition(player->getLastPosition());
     }
 }
 
@@ -122,10 +129,10 @@ const Block &World::getBlock(int x, int y, int z) const {
 World::World(std::shared_ptr<WorldView> view) : worldView(std::move(view)) {
     loadChunksAround({3, 3}); // Load initial chunks around the player
     // Move player to a solid ground position, not in a block
-    for (int y = 0; y < 30 ; y++) {
+    for (int y = 0; y < 30; y++) {
         auto block = getBlock(0, y, 0);
         if (getBlock(50, y, 50).getType() == BlockType::AIR) {
-            player->setPosition(glm::vec3(50.0f, y + 1.0f, 50.0f)); // Set player above the ground
+            player->setPosition(glm::vec3(50.0f, y + 0.8f, 50.0f)); // Set player above the ground
             break;
         }
     }
@@ -188,11 +195,8 @@ void World::updateWorldView() {
 
         for (auto &BlockPair: chunkMap[chunkCoord]->getBlocks()) {
             // Adjust block world position based on chunk position and chunk size
-            BlockPair.second = BlockCoord{
-                    BlockPair.second.x + chunkCoord.x * CHUNK_SIZE,
-                    BlockPair.second.y,
-                    BlockPair.second.z + chunkCoord.z * CHUNK_SIZE
-            };
+            BlockPair.second = BlockCoord{BlockPair.second.x + chunkCoord.x * CHUNK_SIZE, BlockPair.second.y,
+                                          BlockPair.second.z + chunkCoord.z * CHUNK_SIZE};
             blockList.emplace_back(BlockPair.first, BlockPair.second);
         }
     }
@@ -212,16 +216,17 @@ void World::placeBlock() {
                 j++;
             }
             if (absolute(coord.x - player->getPosition().x) <= 1.0f &&
-                absolute(coord.y - player->getPosition().y) <= 2.0f && absolute(coord.z - player->getPosition().z) <= 1.0f) {
+                absolute(coord.y - player->getPosition().y) <= 2.0f &&
+                absolute(coord.z - player->getPosition().z) <= 1.0f) {
                 break;
             }
             ChunkCoord chunkCoord = getChunkCoord(roundFloat(coord.x), roundFloat(coord.z));
             if (chunkMap.find(chunkCoord) == chunkMap.end()) {
                 loadChunk(chunkCoord.x, chunkCoord.z);
             }
-            chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE),
-                                               roundFloat(coord.y),
+            chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE), roundFloat(coord.y),
                                                positive_mod(roundFloat(coord.z), CHUNK_SIZE), BlockType::DIRT);
+            std::cout << "Placed block at: " << coord.x << ", " << coord.y << ", " << coord.z << std::endl;
             updateWorldView();
             break;
         }
@@ -238,8 +243,7 @@ void World::breakBlock() {
             if (chunkMap.find(chunkCoord) == chunkMap.end()) {
                 loadChunk(chunkCoord.x, chunkCoord.z);
             }
-            chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE),
-                                               roundFloat(coord.y),
+            chunkMap[chunkCoord]->replaceBlock(positive_mod(roundFloat(coord.x), CHUNK_SIZE), roundFloat(coord.y),
                                                positive_mod(roundFloat(coord.z), CHUNK_SIZE), BlockType::AIR);
             updateWorldView();
             break;

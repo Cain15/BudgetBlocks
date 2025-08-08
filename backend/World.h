@@ -85,6 +85,10 @@ private:
         return (a >= 0) ? a : -a;
     }
 
+    int floorFloat(float a) {
+        return floorf(a);
+    }
+
     bool playerJumped = false;
 
     void placeBlock();
@@ -92,6 +96,8 @@ private:
     void breakBlock();
 
     void loadChunksAround(const ChunkCoord& currentChunkCoord);
+
+    bool playerColliding();
 };
 
 

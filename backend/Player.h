@@ -9,6 +9,20 @@
 #include "CameraView.h"
 #include "memory"
 
+struct HitBox {
+    glm::vec3 min; // Minimum corner of the bounding box
+    glm::vec3 max; // Maximum corner of the bounding box
+    float getWidth() const {
+        return max.x - min.x;
+    }
+
+    float getHeight() const {
+        return max.y - min.y;
+    }
+
+    HitBox(const glm::vec3 &min, const glm::vec3 &max) : min(min), max(max) {}
+};
+
 class Player {
 public:
     [[nodiscard]] glm::vec3 getPosition() const;
@@ -49,9 +63,13 @@ public:
 
     void update(float deltaTime);
 
+    void updateHitBox();
+
     void moveHead(float mouseX, float mouseY);
+
+    HitBox hitBox = HitBox(glm::vec3(-0.25f, 0.01f, -0.25f), glm::vec3(0.25f, 1.8f, 0.25f)); // Player's hitbox
 private:
-    glm::vec3 Position = glm::vec3(0.0f, 2.0f, 0.0f);
+    glm::vec3 Position = glm::vec3(0.0f, 1.8f, 0.0f);
     glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -66,6 +84,12 @@ private:
     bool accelerating = false; // Flag to check if the player is accelerating
     float initialSpeed = 4.317f;
     float speed = 0.0f;
+
+    glm::vec3 lastPosition = Position;
+public:
+    const glm::vec3 &getLastPosition() const;
+
+private:
     float sensitivity = 150.0f;
     glm::vec3 speedDirection = glm::vec3(0.0f, 0.0f, 0.0f); // Direction of speed
 
